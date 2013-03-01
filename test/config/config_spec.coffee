@@ -1,5 +1,5 @@
-require './spec_helper'
-Config = require '../lib/config'
+require '../spec_helper'
+Config = require '../../lib/config/config'
 fs = require 'fs'
 
 tmpDir = '.mailr-config-test'
