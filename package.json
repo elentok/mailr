@@ -1,0 +1,47 @@
+{
+  "name": "mailr",
+  "description": "command line mail client",
+  "version": "0.0.1",
+  "homepage": "https://github.com/elentok/mailr",
+  "author": {
+    "name": "David Elentok",
+    "email": "3david@gmail.com",
+    "url": "http://www.elentok.com"
+  },
+  "bin": {
+    "mailr": "./bin/mailr"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git://github.com/elentok/mailr.git"
+  },
+  "bugs": {
+    "url": "https://github.com/elentok/mailr/issues"
+  },
+  "licenses": [
+    {
+      "type": "MIT",
+      "url": "https://github.com/elentok/mailr/blob/master/LICENSE-MIT"
+    }
+  ],
+  "main": "lib/mailr.coffee",
+  "engines": {
+    "node": ">= 0.8.0"
+  },
+  "scripts": {
+    "test": "mocha --compilers coffee:coffee-script --reporter spec"
+  },
+  "dependencies": {
+    "nomnom": "1.5.x",
+    "cli-color": "0.2.x",
+    "lodash": "1.0.x"
+  },
+  "devDependencies": {
+    "coffee-script": "1.4.x",
+    "mocha": "1.8.x",
+    "chai": "1.5.x",
+    "sinon": "1.5.x",
+    "sinon-chai": "2.3.x",
+    "sandboxed-module": "0.2.x"
+  }
+}
