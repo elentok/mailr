@@ -29,12 +29,14 @@
     "node": ">= 0.8.0"
   },
   "scripts": {
-    "test": "mocha --compilers coffee:coffee-script --reporter spec"
+    "test": "mocha --recursive --compilers coffee:coffee-script --reporter spec"
   },
   "dependencies": {
+    "commander": "1.1.x",
     "nomnom": "1.5.x",
     "cli-color": "0.2.x",
-    "lodash": "1.0.x"
+    "lodash": "1.0.x",
+    "keychain": "*"
   },
   "devDependencies": {
     "coffee-script": "1.4.x",
