@@ -4,7 +4,8 @@ fs = require 'fs'
 defaultConfigDir = path.join(process.env['HOME'], '.mailr')
 
 module.exports = class Config
-  constructor: (@path = defaultConfigDir) ->
+  constructor: (options) ->
+    @path = options.path or defaultConfigDir
     @accounts = {}
   load: ->
     unless fs.existsSync(@path)

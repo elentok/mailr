@@ -13,7 +13,7 @@ describe "Config", ->
         fs.rmdirSync(tmpDir) if fs.existsSync(tmpDir)
 
       it "creates it", ->
-        config = new Config(tmpDir)
+        config = new Config(path: tmpDir)
         config.load()
         exists = fs.existsSync(tmpDir)
         expect(exists).to.be.true
@@ -22,7 +22,7 @@ describe "Config", ->
           expect(isDir).to.be.true
 
       it "loads the accounts from 'config.coffee'", ->
-        config = new Config('test/fixtures/config-dir')
+        config = new Config(path: 'test/fixtures/config-dir')
         config.load()
         expect(config.accounts).to.eql {
           gmail:
