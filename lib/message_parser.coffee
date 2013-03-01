@@ -16,7 +16,7 @@ module.exports = class MessageParser
     if @state == 'in-body'
       @bodyLines.push(line)
     else
-      @_parseHeaderLine()
+      @_parseHeaderLine(line)
 
   _parseHeaderLine: (line) ->
     if /^From:/.test(line)
