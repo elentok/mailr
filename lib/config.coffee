@@ -6,7 +6,9 @@ defaultConfigDir = path.join(process.env['HOME'], '.mailr')
 module.exports = class Config
   constructor: (options) ->
     @path = options.path or defaultConfigDir
+    @_passwordStore = options.passwordStore
     @accounts = {}
+
   load: ->
     unless fs.existsSync(@path)
       fs.mkdirSync(@path)
@@ -16,5 +18,11 @@ module.exports = class Config
       for own key, value of data
         @[key] = value
 
+  getPassword: (accountName, protocol) ->
+    account = @accounts[accountName]
+    if account.username?
+      @_passwordStore.getPassword(accountName)
+    else
+      @_passwordStore.getPassword("#{accountName}:#{protocol}")
 
-
+    

@@ -34,3 +34,29 @@ describe "Config", ->
               server: 'imap.gmail.com'
               port: 993
         }
+
+  describe "#getPassword('myAccount', 'smtp')", ->
+    beforeEach ->
+      @passwordStore =
+        getPassword: sinon.stub().returns('the-password')
+      @config = new Config(passwordStore: @passwordStore)
+
+    describe "when accounts = { myAccount: { username: '123' } }", ->
+      it "gets the password from 'myAccount'", ->
+        @config.accounts =
+          myAccount:
+            username: '123'
+        password = @config.getPassword('myAccount', 'smtp')
+        expect(@passwordStore.getPassword).to.have.been.calledWith('myAccount')
+        expect(password).to.equal 'the-password'
+
+
+    describe "when accounts = { myAccount: { smtp: { username: '123' } }", ->
+      it "gets the password from 'myAccount:smtp'", ->
+        @config.accounts =
+          myAccount:
+            smtp:
+              username: '123'
+        password = @config.getPassword('myAccount', 'smtp')
+        expect(@passwordStore.getPassword).to.have.been.calledWith('myAccount:smtp')
+        expect(password).to.equal 'the-password'
