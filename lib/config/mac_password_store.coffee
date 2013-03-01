@@ -1,29 +1,18 @@
 commander = require 'commander'
-keychain = require 'keychain'
+keychainSync = require 'keychain-sync'
 
 module.exports = class MacPasswordStore
   getPassword: (key, callback) ->
-    options =
-      account: 'mailr'
-      service: key
-    keychain.getPassword options, (err, password) =>
-      if err?
-        @_askUserForPassword key, callback
-      else
-        callback(null, password)
+    password = keychainSync.getPassword('mailr', key)
+    if password?
+      callback(null, password)
+    else
+      @_askUserForPassword key, callback
 
   _askUserForPassword: (key, callback) ->
     commander.password "Enter password for #{key}: ", (password) =>
       if password?
-        @_savePassword key, password, (err) ->
-          callback(err, password)
+        keychainSync.setPassword('mailr', key, password)
+        callback(null, password)
       else
         callback('user aborted', null)
-
-  _savePassword: (key, password, callback) ->
-    options =
-      account: 'mailr'
-      service: key
-      password: password
-
-    keychain.setPassword(options, callback)

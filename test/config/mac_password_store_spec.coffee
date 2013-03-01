@@ -1,56 +1,50 @@
 require '../spec_helper'
 
 commander = {}
-keychain = {}
+keychainSync = {}
 
 MacPasswordStore = sandbox.require '../../lib/config/mac_password_store',
   requires:
-    keychain: keychain
+    'keychain-sync': keychainSync
     commander: commander
 
 describe "MacPasswordStore", ->
   beforeEach ->
     @store = new MacPasswordStore()
-    keychain.getPassword = sinon.stub()
-    keychain.setPassword = sinon.stub()
+    keychainSync.getPassword = sinon.stub()
+    keychainSync.setPassword = sinon.stub()
     commander.password = sinon.stub()
 
   describe "#getPassword", ->
     describe "when the password is in the keychain", ->
-      it "calls the callback with the password", (done) ->
-        keychain.getPassword.callsArgWith(1, null, 'the-password')
-
-        @store.getPassword 'myAccount', (err, password) ->
-          expectedOptions = { account: 'mailr', service: 'myAccount' }
-          expect(keychain.getPassword.getCall(0).args[0]).to.eql expectedOptions
-          expect(keychain.getPassword).to.have.been.calledWith(expectedOptions)
-          expect(password).to.equal 'the-password'
-          done()
-
+      it "alls the callback with the password", ->
+        callback = sinon.spy()
+        keychainSync.getPassword.returns('the-password')
+        @store.getPassword 'myAccount', callback
+        expect(keychainSync.getPassword).to.have.been.calledWith('mailr', 'myAccount')
+        expect(callback).to.have.been.calledWith(null, 'the-password')
 
     describe "when the password isn't in the keychain", ->
-      it "asks the user for the password", (done) ->
-        keychain.getPassword.callsArgWith(1, 'err', null)
-        keychain.setPassword.callsArgWith(1, null)
+      it "asks the user for the password", ->
+        keychainSync.getPassword.returns(null)
         commander.password.callsArgWith(1, 'the-password')
 
-        @store.getPassword 'myAccount', (err, password) ->
-          expect(commander.password).to.have.been.called
-          expect(password).to.equal 'the-password'
-          done()
+        callback = sinon.spy()
+        @store.getPassword 'myAccount', callback
+        expect(commander.password).to.have.been.called
 
-      it "stores the password in the keychain", (done) ->
-        keychain.getPassword.callsArgWith(1, 'err', null)
-        keychain.setPassword.callsArgWith(1, null)
+      it "stores the password in the keychain", ->
+        keychainSync.getPassword.returns(null)
         commander.password.callsArgWith(1, 'the-password')
 
-        @store.getPassword 'myAccount', (err, password) ->
-          expectedOptions =
-            account: 'mailr'
-            service: 'myAccount'
-            password: 'the-password'
-          expect(keychain.setPassword.getCall(0).args[0]).to.eql expectedOptions
-          expect(keychain.setPassword).to.have.been.calledWith(expectedOptions)
-          expect(commander.password).to.have.been.called
-          expect(password).to.equal 'the-password'
-          done()
+        @store.getPassword 'myAccount', ->
+        expect(keychainSync.setPassword).to.have.been.calledWith(
+          'mailr', 'myAccount', 'the-password')
+
+      it "calls the callback with the password", ->
+        keychainSync.getPassword.returns(null)
+        commander.password.callsArgWith(1, 'the-password')
+
+        callback = sinon.spy()
+        @store.getPassword 'myAccount', callback
+        expect(callback).to.have.been.calledWith(null, 'the-password')

@@ -36,7 +36,8 @@
     "nomnom": "1.5.x",
     "cli-color": "0.2.x",
     "lodash": "1.0.x",
-    "keychain": "*"
+    "keychain-sync": "0.0.x",
+    "simplesmtp": "*"
   },
   "devDependencies": {
     "coffee-script": "1.4.x",
