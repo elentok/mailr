@@ -26,13 +26,8 @@ describe "Config", ->
         config.load()
         expect(config.accounts).to.eql {
           gmail:
-            username: 'my-username'
-            smtp:
-              server: 'smtp.gmail.com'
-              port: 465
-            imap:
-              server: 'imap.gmail.com'
-              port: 993
+            service: 'Gmail'
+            username: 'me@gmail.com'
         }
 
   describe "#getPassword('myAccount', 'smtp')", ->
@@ -60,3 +55,15 @@ describe "Config", ->
         password = @config.getPassword('myAccount', 'smtp')
         expect(@passwordStore.getPassword).to.have.been.calledWith('myAccount:smtp')
         expect(password).to.equal 'the-password'
+
+  describe "#findAccountByEmail", ->
+    it "returns the account name where the username matches the address", ->
+      config = new Config()
+      config.accounts =
+        gmail_me:
+          username: 'me@gmail.com'
+        gmail_you:
+          username: 'you@gmail.com'
+      accountName = config.findAccountByEmail('me@gmail.com')
+      expect(accountName).to.equal 'gmail_me'
+

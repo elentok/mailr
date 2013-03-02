@@ -25,4 +25,9 @@ module.exports = class Config
     else
       @_passwordStore.getPassword("#{accountName}:#{protocol}", callback)
 
+  findAccountByEmail: (email) ->
+    for own accountName, account of @accounts
+      if account.username == email
+        return accountName
+    return null
     

@@ -1,11 +1,5 @@
 module.exports =
   accounts:
     gmail:
-      username: 'my-username'
-      smtp:
-        server: 'smtp.gmail.com'
-        port: 465
-      imap:
-        server: 'imap.gmail.com'
-        port: 993
-        
+      service: 'Gmail'
+      username: 'me@gmail.com'

@@ -10,7 +10,6 @@ nomnom.command('send')
       abbr: 'a'
       metavar: 'ACCOUNT'
       help: 'the account from which to send'
-      required: true
     emailFile:
       position: 1
       help: 'name of email file to send'

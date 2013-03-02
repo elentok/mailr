@@ -12,8 +12,12 @@ module.exports = class Mailr
 
   send: (options = {}, callback)->
     message = @parser.parse(options.filename)
+    if options.account?
+      account = options.account
+    else
+      account = @config.findAccountByEmail(message.fromAddress)
     smtpClient = new SmtpClient(@config)
-    smtpClient.connect options.account, (err) ->
+    smtpClient.connect account, (err) ->
       smtpClient.send message, (err, response) ->
         smtpClient.close()
         callback?(err, response)

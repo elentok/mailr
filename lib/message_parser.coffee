@@ -33,6 +33,11 @@ module.exports = class MessageParser
 
   _parseFrom: (line) ->
     @message.from = line.substring(5).trim()
+    match = /<(.+)>/.exec(@message.from)
+    if match?
+      @message.fromAddress = match[1]
+    else
+      @message.fromAddress = @message.from
 
   _parseTo: (line) ->
     recipients = line.substring(3).trim().split(',')
