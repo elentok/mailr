@@ -31,10 +31,12 @@ nomnom.command('send')
       if err?
         console.log "ERROR: #{err}"
       else
+        console.log "\nSending..."
         client.send message, (err, response) ->
           if err?
             console.log "ERROR: #{err}"
           else
             console.log response
+          client.close()
 
 nomnom.parse()

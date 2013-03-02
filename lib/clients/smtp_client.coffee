@@ -29,4 +29,6 @@ module.exports = class SmtpClient
   send: (message, callback) ->
     @transport.sendMail(message, callback)
 
+  close: ->
+    @transport.close()
 
