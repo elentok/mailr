@@ -9,7 +9,7 @@ module.exports = class MessageParser
     @bodyLines = []
     for line in email.split("\n")
       @_parseLine(line)
-    @message.body = @bodyLines.join("\n").trim()
+    @message.text = @bodyLines.join("\n").trim()
     @message
 
   _parseLine: (line) ->

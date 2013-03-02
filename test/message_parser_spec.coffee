@@ -11,5 +11,5 @@ describe 'MessageParser', ->
         from: 'Me <me@me.com>'
         to: ['You <you@you.com>', 'YouToo <you2@you.com>']
         subject: 'Hello World!'
-        body: "Hi!\nHow are you doing?\n\nThanks,\nMe."
+        text: "Hi!\nHow are you doing?\n\nThanks,\nMe."
       }

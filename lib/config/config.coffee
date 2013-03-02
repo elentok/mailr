@@ -4,7 +4,7 @@ fs = require 'fs'
 defaultConfigDir = path.join(process.env['HOME'], '.mailr')
 
 module.exports = class Config
-  constructor: (options) ->
+  constructor: (options = {}) ->
     @path = options.path or defaultConfigDir
     @_passwordStore = options.passwordStore
     @accounts = {}
@@ -18,11 +18,11 @@ module.exports = class Config
       for own key, value of data
         @[key] = value
 
-  getPassword: (accountName, protocol) ->
+  getPassword: (accountName, protocol, callback) ->
     account = @accounts[accountName]
     if account.username?
-      @_passwordStore.getPassword(accountName)
+      @_passwordStore.getPassword(accountName, callback)
     else
-      @_passwordStore.getPassword("#{accountName}:#{protocol}")
+      @_passwordStore.getPassword("#{accountName}:#{protocol}", callback)
 
     

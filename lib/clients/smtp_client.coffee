@@ -2,7 +2,7 @@ nodemailer = require 'nodemailer'
 
 module.exports = class SmtpClient
   constructor: (@config) ->
-    @client = null
+    @transport = null
 
   getConnectArgs: (accountName, callback) ->
     settings = @config.accounts[accountName]

@@ -1,0 +1,40 @@
+#!/usr/bin/env coffee
+
+MacPasswordStore = require '../lib/config/mac_password_store'
+Config = require '../lib/config/config'
+MessageParser = require '../lib/message_parser'
+SmtpClient = require '../lib/clients/smtp_client'
+
+config = new Config(passwordStore: new MacPasswordStore())
+config.load()
+
+nomnom = require 'nomnom'
+nomnom.script('mailr')
+nomnom.command('send')
+  .options
+    account:
+      abbr: 'a'
+      metavar: 'ACCOUNT'
+      help: 'the account from which to send'
+      required: true
+    emailFile:
+      position: 1
+      help: 'name of email file to send'
+      required: true
+  .help("send an email")
+  .callback (opts) ->
+    parser = new MessageParser()
+    message = parser.parse(opts.emailFile)
+
+    client = new SmtpClient(config)
+    client.connect opts.account, (err) ->
+      if err?
+        console.log "ERROR: #{err}"
+      else
+        client.send message, (err, response) ->
+          if err?
+            console.log "ERROR: #{err}"
+          else
+            console.log response
+
+nomnom.parse()
