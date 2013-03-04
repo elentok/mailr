@@ -37,7 +37,8 @@
     "cli-color": "0.2.x",
     "lodash": "1.0.x",
     "keychain-sync": "0.0.x",
-    "nodemailer": "0.3.x"
+    "nodemailer": "0.3.x",
+    "gcontacts": "*"
   },
   "devDependencies": {
     "coffee-script": "1.4.x",

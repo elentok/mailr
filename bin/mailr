@@ -25,4 +25,26 @@ nomnom.command('send')
         else
           console.log response
 
+nomnom.command('contacts')
+  .options
+    account:
+      abbr: 'a'
+      metavar: 'ACCOUNT'
+      help: 'the account from which to send'
+    update:
+      abbr: 'u'
+      flag: true
+      help: 'updates the local contacts file'
+  .help("gets the contacts")
+  .callback (opts) ->
+    mailr = new Mailr()
+    if opts.update
+      mailr.updateContacts opts.account, (err, contacts) ->
+        if err?
+          console.log "ERROR: #{err}"
+        else
+          for contact in contacts
+            console.log contact
+
+
 nomnom.parse()
