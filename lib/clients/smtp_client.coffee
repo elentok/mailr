@@ -5,7 +5,7 @@ module.exports = class SmtpClient
     @transport = null
 
   getConnectArgs: (accountName, callback) ->
-    settings = @config.accounts[accountName]
+    settings = @config.accounts[accountName].attribs
     username = settings.username
     @config.getPassword accountName, 'smtp', (err, password) ->
       if err?

@@ -16,11 +16,11 @@ module.exports = class Mailr
   send: (options = {}, callback)->
     message = @parser.parse(options.filename)
     if options.account?
-      account = options.account
+      accountName = options.account
     else
-      account = @config.findAccountByEmail(message.fromAddress)
+      accountName = @config.findAccountByEmail(message.fromAddress)
     smtpClient = new SmtpClient(@config)
-    smtpClient.connect account, (err) ->
+    smtpClient.connect accountName, (err) ->
       smtpClient.send message, (err, response) ->
         smtpClient.close()
         callback?(err, response)
@@ -28,7 +28,7 @@ module.exports = class Mailr
   getContacts: (accountName, callback) ->
     @config.getPassword accountName, 'smtp', (err, password) =>
       auth =
-        email: @config.accounts[accountName].username
+        email: @config.accounts[accountName].attribs.username
         password: password
       GoogleContacts = require 'gcontacts'
       gcontacts = new GoogleContacts(auth)

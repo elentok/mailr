@@ -69,6 +69,14 @@ describe "Config", ->
       accountName = config.findAccountByEmail('me@gmail.com')
       expect(accountName).to.equal 'gmail_me'
 
+    it "handles 'Full Name <me@gmail.com>'", ->
+      config = new Config()
+      config.accounts =
+        gmail_me: new Account(username: 'me@gmail.com')
+        gmail_you: new Account(username: 'you@gmail.com')
+      accountName = config.findAccountByEmail('Full Name <me@gmail.com>')
+      expect(accountName).to.equal 'gmail_me'
+
   describe "#getFromAddresses", ->
     it "returns the fullname and email of all accounts", ->
       config = new Config()

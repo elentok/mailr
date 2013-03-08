@@ -29,6 +29,10 @@ module.exports = class Config
       @_passwordStore.getPassword("#{accountName}:#{protocol}", callback)
 
   findAccountByEmail: (email) ->
+    match = /<(.*)>/.exec(email)
+    if match?
+      email = match[1]
+
     for own accountName, account of @accounts
       if account.getEmail() == email
         return accountName
