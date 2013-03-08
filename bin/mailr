@@ -1,6 +1,8 @@
 #!/usr/bin/env coffee
 
-Mailr = require '../lib/mailr'
+createMailr = ->
+  Mailr = require '../lib/mailr'
+  new Mailr()
 
 nomnom = require 'nomnom'
 nomnom.script('mailr')
@@ -16,7 +18,7 @@ nomnom.command('send')
       required: true
   .help("send an email")
   .callback (opts) ->
-    mailr = new Mailr()
+    mailr = createMailr()
     console.log "Sending..."
     mailr.send {filename: opts.emailFile, account: opts.account},
       (err, response) ->
@@ -37,7 +39,7 @@ nomnom.command('contacts')
       help: 'updates the local contacts file'
   .help("gets the contacts")
   .callback (opts) ->
-    mailr = new Mailr()
+    mailr = createMailr()
     if opts.update
       mailr.updateContacts opts.account, (err, contacts) ->
         if err?
@@ -45,6 +47,15 @@ nomnom.command('contacts')
         else
           for contact in contacts
             console.log contact
+
+nomnom.command('addresses')
+  .help("shows the available from addresses")
+  .callback ->
+    Config = require '../lib/config/config'
+    config = new Config()
+    config.load()
+    for address in config.getFromAddresses()
+      console.log address
 
 
 nomnom.parse()

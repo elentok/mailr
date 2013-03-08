@@ -1,6 +1,8 @@
 require '../spec_helper'
 Config = require '../../lib/config/config'
+Account = require '../../lib/config/account'
 fs = require 'fs'
+_ = require 'lodash'
 
 tmpDir = '.mailr-config-test'
 
@@ -24,10 +26,13 @@ describe "Config", ->
       it "loads the accounts from 'config.coffee'", ->
         config = new Config(path: 'test/fixtures/config-dir')
         config.load()
-        expect(config.accounts).to.eql {
-          gmail:
-            service: 'Gmail'
-            username: 'me@gmail.com'
+        accountNames = _.keys(config.accounts)
+        expect(accountNames).to.eql ['gmail']
+        account = config.accounts['gmail']
+        expect(account).to.be.instanceof(Account)
+        expect(account.attribs).to.eql {
+          service: 'Gmail',
+          username: 'me@gmail.com'
         }
 
   describe "#getPassword('myAccount', 'smtp')", ->
@@ -39,8 +44,7 @@ describe "Config", ->
     describe "when accounts = { myAccount: { username: '123' } }", ->
       it "gets the password from 'myAccount'", ->
         @config.accounts =
-          myAccount:
-            username: '123'
+          myAccount: new Account(username: '123')
         password = @config.getPassword('myAccount', 'smtp')
         expect(@passwordStore.getPassword).to.have.been.calledWith('myAccount')
         expect(password).to.equal 'the-password'
@@ -49,9 +53,9 @@ describe "Config", ->
     describe "when accounts = { myAccount: { smtp: { username: '123' } }", ->
       it "gets the password from 'myAccount:smtp'", ->
         @config.accounts =
-          myAccount:
+          myAccount: new Account(
             smtp:
-              username: '123'
+              username: '123')
         password = @config.getPassword('myAccount', 'smtp')
         expect(@passwordStore.getPassword).to.have.been.calledWith('myAccount:smtp')
         expect(password).to.equal 'the-password'
@@ -60,10 +64,18 @@ describe "Config", ->
     it "returns the account name where the username matches the address", ->
       config = new Config()
       config.accounts =
-        gmail_me:
-          username: 'me@gmail.com'
-        gmail_you:
-          username: 'you@gmail.com'
+        gmail_me: new Account(username: 'me@gmail.com')
+        gmail_you: new Account(username: 'you@gmail.com')
       accountName = config.findAccountByEmail('me@gmail.com')
       expect(accountName).to.equal 'gmail_me'
+
+  describe "#getFromAddresses", ->
+    it "returns the fullname and email of all accounts", ->
+      config = new Config()
+      config.accounts =
+        example1:
+          getAddress: -> '123'
+        example2:
+          getAddress: -> '456'
+      expect(config.getFromAddresses()).to.eql ['123', '456']
 
