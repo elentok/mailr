@@ -16,8 +16,8 @@ describe 'SmtpClient', ->
       config =
         accounts:
           myAccount:
-            service: 'Gmail'
-            username: 'me@gmail.com'
+            getService: -> 'Gmail'
+            getUsername: -> 'me@gmail.com'
         getPassword: sinon.stub().callsArgWith(2, null, 'the-password')
 
       callback = sinon.spy()

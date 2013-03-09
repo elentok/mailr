@@ -35,46 +35,30 @@ describe "Config", ->
           username: 'me@gmail.com'
         }
 
-  describe "#getPassword('myAccount', 'smtp')", ->
+  describe "#getPassword('myAccount', protocol)", ->
     beforeEach ->
       @passwordStore =
         getPassword: sinon.stub().returns('the-password')
       @config = new Config(passwordStore: @passwordStore)
 
-    describe "when accounts = { myAccount: { username: '123' } }", ->
-      it "gets the password from 'myAccount'", ->
+    describe "when accounts = { myAccount: getPasswordKeySuffix -> ':bla' }", ->
+      it "gets the password from 'myAccount:bla'", ->
         @config.accounts =
-          myAccount: new Account(username: '123')
+          myAccount:
+            getPasswordKeySuffix: -> ':bla'
         password = @config.getPassword('myAccount', 'smtp')
-        expect(@passwordStore.getPassword).to.have.been.calledWith('myAccount')
-        expect(password).to.equal 'the-password'
-
-
-    describe "when accounts = { myAccount: { smtp: { username: '123' } }", ->
-      it "gets the password from 'myAccount:smtp'", ->
-        @config.accounts =
-          myAccount: new Account(
-            smtp:
-              username: '123')
-        password = @config.getPassword('myAccount', 'smtp')
-        expect(@passwordStore.getPassword).to.have.been.calledWith('myAccount:smtp')
+        expect(@passwordStore.getPassword).to.have.been.calledWith('myAccount:bla')
         expect(password).to.equal 'the-password'
 
   describe "#findAccountByEmail", ->
     it "returns the account name where the username matches the address", ->
       config = new Config()
       config.accounts =
-        gmail_me: new Account(username: 'me@gmail.com')
-        gmail_you: new Account(username: 'you@gmail.com')
+        gmail_me:
+          getEmail: -> 'me@gmail.com'
+        gmail_you:
+          getEmail: -> 'you@gmail.com'
       accountName = config.findAccountByEmail('me@gmail.com')
-      expect(accountName).to.equal 'gmail_me'
-
-    it "handles 'Full Name <me@gmail.com>'", ->
-      config = new Config()
-      config.accounts =
-        gmail_me: new Account(username: 'me@gmail.com')
-        gmail_you: new Account(username: 'you@gmail.com')
-      accountName = config.findAccountByEmail('Full Name <me@gmail.com>')
       expect(accountName).to.equal 'gmail_me'
 
   describe "#getFromAddresses", ->
@@ -82,8 +66,8 @@ describe "Config", ->
       config = new Config()
       config.accounts =
         example1:
-          getAddress: -> '123'
+          getFromAddress: -> '123'
         example2:
-          getAddress: -> '456'
+          getFromAddress: -> '456'
       expect(config.getFromAddresses()).to.eql ['123', '456']
 

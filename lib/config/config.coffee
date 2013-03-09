@@ -23,10 +23,8 @@ module.exports = class Config
 
   getPassword: (accountName, protocol, callback) ->
     account = @accounts[accountName]
-    if account.attribs.username?
-      @_passwordStore.getPassword(accountName, callback)
-    else
-      @_passwordStore.getPassword("#{accountName}:#{protocol}", callback)
+    passwordKey = accountName + account.getPasswordKeySuffix()
+    @_passwordStore.getPassword(passwordKey, callback)
 
   findAccountByEmail: (email) ->
     match = /<(.*)>/.exec(email)
@@ -41,7 +39,7 @@ module.exports = class Config
   getFromAddresses: ->
     addresses = []
     for own accountName, account of @accounts
-      addresses.push account.getAddress()
+      addresses.push account.getFromAddress()
 
     addresses
 

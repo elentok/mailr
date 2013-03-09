@@ -2,7 +2,7 @@ module.exports = class Account
   constructor: (attribs = {}) ->
     @attribs = attribs
 
-  getAddress: ->
+  getFromAddress: ->
     if @attribs.fullname?
       "#{@attribs.fullname} <#{@getEmail()}>"
     else
@@ -10,3 +10,17 @@ module.exports = class Account
 
   getEmail: ->
     @attribs.email or @attribs.username
+
+  getUsername: (protocol) ->
+    if @attribs[protocol]?.username?
+      @attribs[protocol].username
+    else
+      @attribs.username
+
+  getPasswordKeySuffix: (protocol) ->
+    if @attribs[protocol]?.username?
+      ":#{protocol}"
+    else
+      ''
+  
+  getService: -> @attribs.service

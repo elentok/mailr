@@ -5,25 +5,27 @@ module.exports = class SmtpClient
     @transport = null
 
   getConnectArgs: (accountName, callback) ->
-    settings = @config.accounts[accountName].attribs
-    username = settings.username
-    @config.getPassword accountName, 'smtp', (err, password) ->
+    account = @config.accounts[accountName]
+    @config.getPassword accountName, 'smtp', (err, password) =>
       if err?
         callback?(err, null)
       else
-        callback?(null, {
-          service: settings.service
-          auth:
-            user: username
-            pass: password
-        })
+        callback?(null, @_buildConnectArgs(account, password))
+
+  _buildConnectArgs: (account, password) ->
+    {
+      service: account.getService()
+      auth:
+        user: account.getUsername()
+        pass: password
+    }
 
   connect: (accountName, callback) ->
-    @getConnectArgs accountName, (err, settings) =>
+    @getConnectArgs accountName, (err, connectArgs) =>
       if err?
         callback?(err)
       else
-        @transport = nodemailer.createTransport('SMTP', settings)
+        @transport = nodemailer.createTransport('SMTP', connectArgs)
         callback?(null)
 
   send: (message, callback) ->
