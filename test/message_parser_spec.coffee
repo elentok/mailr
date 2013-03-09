@@ -11,6 +11,8 @@ describe 'MessageParser', ->
         from: 'Me <me@me.com>'
         fromAddress: 'me@me.com'
         to: ['You <you@you.com>', 'YouToo <you2@you.com>']
+        cc: ['Bob <bob@you.com>']
+        bcc: ['Joe <joe@you.com>']
         subject: 'Hello World!'
         text: "Hi!\nHow are you doing?\n\nThanks,\nMe."
       }

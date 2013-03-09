@@ -1,5 +1,7 @@
 From: Me <me@me.com>
 To: You <you@you.com>, YouToo <you2@you.com>
+Cc: Bob <bob@you.com>
+Bcc: Joe <joe@you.com>
 Subject: Hello World!
 =====================
 

@@ -24,7 +24,13 @@ module.exports = class MessageParser
       @_parseFrom(line)
     else if /^To:/.test(line)
       @state = 'in-field'
-      @_parseTo(line)
+      @_parseAddressesField('to', line)
+    else if /^Cc:/.test(line)
+      @state = 'in-field'
+      @_parseAddressesField('cc', line)
+    else if /^Bcc:/.test(line)
+      @state = 'in-field'
+      @_parseAddressesField('bcc', line)
     else if /^Subject:/.test(line)
       @state = 'in-field'
       @_parseSubject(line)
@@ -39,9 +45,9 @@ module.exports = class MessageParser
     else
       @message.fromAddress = @message.from
 
-  _parseTo: (line) ->
-    recipients = line.substring(3).trim().split(',')
-    @message.to = _.map recipients, (recipient) -> recipient.trim()
+  _parseAddressesField: (fieldName, line) ->
+    recipients = line.substring(fieldName.length + 1).trim().split(',')
+    @message[fieldName] = _.map recipients, (recipient) -> recipient.trim()
 
   _parseSubject: (line) ->
     @message.subject = line.substring(8).trim()
