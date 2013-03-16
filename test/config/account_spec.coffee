@@ -3,16 +3,16 @@ Account = require '../../lib/config/account'
 
 test = (methodName, attributes, output) ->
   describe "when #{JSON.stringify(attributes)}", ->
-    it "returns '#{output}'", ->
+    it "returns #{JSON.stringify(output)}", ->
       account = new Account(attributes)
-      expect(account[methodName]()).to.equal output
+      expect(account[methodName]()).to.eql output
 
 testWithArgs = (methodName, args, attributes, output) ->
   argsJSON = JSON.stringify(args)
   describe "(#{argsJSON}) when #{JSON.stringify(attributes)}", ->
-    it "returns '#{output}'", ->
+    it "returns #{JSON.stringify(output)}", ->
       account = new Account(attributes)
-      expect(account[methodName].apply(account, args)).to.equal output
+      expect(account[methodName].apply(account, args)).to.eql output
 
 describe "Account", ->
 
@@ -38,3 +38,10 @@ describe "Account", ->
 
   describe "#getService", ->
     test 'getService', { service: '123' }, '123'
+
+  describe "#getServer(protocol)", ->
+    testWithArgs 'getServer', ['imap'], { imap: { host: 'my-server', port: 123 } },
+      { host: 'my-server', port: 123 }
+    testWithArgs 'getServer', ['imap'], { service: 'Gmail' },
+      { host: 'imap.gmail.com', port: 993 }
+
