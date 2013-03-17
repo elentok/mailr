@@ -51,8 +51,7 @@ nomnom.command('contacts')
 nomnom.command('addresses')
   .help("shows the available from addresses")
   .callback ->
-    Config = require '../lib/config/config'
-    config = new Config()
+    config = require '../lib/config/config'
     config.load()
     for address in config.getFromAddresses()
       console.log address

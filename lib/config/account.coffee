@@ -1,3 +1,6 @@
+passwordStore = require './password_store'
+Q = require 'q'
+
 module.exports = class Account
   constructor: (attribs = {}) ->
     @attribs = attribs
@@ -17,11 +20,15 @@ module.exports = class Account
     else
       @attribs.username
 
-  getPasswordKeySuffix: (protocol) ->
+  getPasswordKey: (protocol) ->
     if @attribs[protocol]?.username?
-      ":#{protocol}"
+      "#{@attribs.name}:#{protocol}"
     else
-      ''
+      @attribs.name
+
+  getPassword: (protocol) ->
+    key = @getPasswordKey(protocol)
+    Q.when(passwordStore.get(key))
   
   getService: -> @attribs.service
 

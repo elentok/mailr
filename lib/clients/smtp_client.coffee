@@ -1,16 +1,19 @@
 nodemailer = require 'nodemailer'
+Q = require 'q'
 
 module.exports = class SmtpClient
-  constructor: (@config) ->
+  constructor: () ->
     @transport = null
 
-  getConnectArgs: (accountName, callback) ->
-    account = @config.accounts[accountName]
-    @config.getPassword accountName, 'smtp', (err, password) =>
-      if err?
-        callback?(err, null)
-      else
-        callback?(null, @_buildConnectArgs(account, password))
+  getConnectArgs: (account, callback) ->
+    deferred = Q.defer()
+    account.getPassword('smtp')
+      .then (password) =>
+        args = @_buildConnectArgs(account, password)
+        deferred.resolve(args)
+      .fail (err) ->
+        deferred.reject(err)
+    deferred.promise
 
   _buildConnectArgs: (account, password) ->
     {
@@ -20,13 +23,10 @@ module.exports = class SmtpClient
         pass: password
     }
 
-  connect: (accountName, callback) ->
-    @getConnectArgs accountName, (err, connectArgs) =>
-      if err?
-        callback?(err)
-      else
-        @transport = nodemailer.createTransport('SMTP', connectArgs)
-        callback?(null)
+  connect: (account) ->
+    @getConnectArgs(account).then (args) =>
+      console.log "calling nodemailer.createTransport"
+      @transport = nodemailer.createTransport('SMTP', args)
 
   send: (message, callback) ->
     @transport.sendMail(message, callback)

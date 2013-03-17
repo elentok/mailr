@@ -4,43 +4,41 @@ Account = require './account'
 
 defaultConfigDir = path.join(process.env['HOME'], '.mailr')
 
-module.exports = class Config
-  constructor: (options = {}) ->
-    @path = options.path or defaultConfigDir
-    @_passwordStore = options.passwordStore
+exports.currentPath = null
+
+exports.accounts = {}
+
+exports.load = (dir = defaultConfigDir) ->
+  @currentPath = dir
+  unless fs.existsSync(dir)
+    fs.mkdirSync(dir)
+  filePath = path.resolve(path.join(dir, 'config.coffee'))
+  if fs.existsSync(filePath)
+    data = require filePath
+    for own key, value of data
+      @[key] = value
     @accounts = {}
+    for own key, attribs of data.accounts
+      attribs.name = key
+      @accounts[key] = new Account(attribs)
 
-  load: ->
-    unless fs.existsSync(@path)
-      fs.mkdirSync(@path)
-    filePath = path.resolve(path.join(@path, 'config.coffee'))
-    if fs.existsSync(filePath)
-      data = require filePath
-      for own key, value of data
-        @[key] = value
-      for own key, attribs of data.accounts
-        data.accounts[key] = new Account(attribs)
+getEmailFromAddress = (address) ->
+  match = /<(.*)>/.exec(address)
+  if match?
+    match[1]
+  else
+    address
 
-  getPassword: (accountName, protocol, callback) ->
-    account = @accounts[accountName]
-    passwordKey = accountName + account.getPasswordKeySuffix()
-    @_passwordStore.getPassword(passwordKey, callback)
+exports.findAccountByEmail = (email) ->
+  email = getEmailFromAddress(email)
 
-  findAccountByEmail: (email) ->
-    match = /<(.*)>/.exec(email)
-    if match?
-      email = match[1]
+  for own accountName, account of @accounts
+    if account.getEmail() == email
+      return account
+  return null
 
-    for own accountName, account of @accounts
-      if account.getEmail() == email
-        return accountName
-    return null
-    
-  getFromAddresses: ->
-    addresses = []
-    for own accountName, account of @accounts
-      addresses.push account.getFromAddress()
-
-    addresses
-
-
+exports.getFromAddresses = ->
+  addresses = []
+  for own accountName, account of @accounts
+    addresses.push account.getFromAddress()
+  addresses

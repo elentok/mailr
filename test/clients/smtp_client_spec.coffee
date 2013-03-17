@@ -9,44 +9,40 @@ SmtpClient = sandbox.require '../../lib/clients/smtp_client',
 describe 'SmtpClient', ->
   beforeEach ->
     @transport = {}
-    nodemailer.createTransport = sinon.stub().returns(@transport)
+    nodemailer.createTransport = @stub().returns(@transport)
 
-  describe "#getConnectArgs(accountName)", ->
-    it "calls callback with nodemailer-oriented settings", ->
-      config =
-        accounts:
-          myAccount:
-            getService: -> 'Gmail'
-            getUsername: -> 'me@gmail.com'
-        getPassword: sinon.stub().callsArgWith(2, null, 'the-password')
+  describe "#getConnectArgs(account)", ->
+    beforeEach ->
+      @client = new SmtpClient()
+      @account =
+        getService: -> 'Gmail'
+        getUsername: -> 'me@gmail.com'
+        getPassword: -> Q.when('the-password')
 
-      callback = sinon.spy()
+    it "returns a promise", ->
+      @client.getConnectArgs(@account).then.should.be.a.function
 
-      client = new SmtpClient(config)
-      client.getConnectArgs 'myAccount', callback
-      settings =
+    it "resolves the callback with nodemailer-oriented settings", (done) ->
+      @client.getConnectArgs(@account).should.become(
         service: 'Gmail'
         auth:
           user: 'me@gmail.com'
           pass: 'the-password'
-      expect(callback).to.have.been.calledOnce
-      expect(callback.getCall(0).args[0]).to.eql null
-      expect(callback.getCall(0).args[1]).to.eql settings
+      ).and.notify(done)
 
-  describe "#connect(accountName)", ->
+  describe "#connect(account)", ->
     beforeEach ->
-      @settings = 'the-settings'
-      @client = new SmtpClient(null)
-      sinon.stub(@client, 'getConnectArgs').callsArgWith(1, null, @settings)
+      @args = 'the-connect-args'
+      @client = new SmtpClient()
+      @stub(@client, 'getConnectArgs').returns(Q.when(@args))
 
-    it "connects to the account's smtp server", ->
-      @client.connect('myAccount', sinon.spy())
-      expect(nodemailer.createTransport).to.have.been.calledWith('SMTP', @settings)
+    it "returns a promise", ->
+      @client.connect('the-account').then.should.be.a.function
 
-    it "calls the callback on when done", ->
-      callback = sinon.spy()
-      @client.connect('myAccount', callback)
-      expect(callback).to.have.been.called
+    it "connects to the account's smtp server", (done) ->
+      @client.connect('the-account').then =>
+        expect(nodemailer.createTransport).to.have.been.calledWith('SMTP', @args)
+        done()
 
   describe "#send", ->
     beforeEach ->
@@ -55,7 +51,7 @@ describe 'SmtpClient', ->
         to: 'you'
         subject: 'hi'
         text: 'yo!'
-      @transport.sendMail = sinon.stub()
+      @transport.sendMail = @stub()
 
     it "sends an email message", ->
       client = new SmtpClient()

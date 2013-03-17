@@ -1,34 +1,33 @@
-MacPasswordStore = require './config/mac_password_store'
-Config = require './config/config'
+config = require './config/config'
 SmtpClient = require './clients/smtp_client'
 MessageParser = require './message_parser'
 path = require 'path'
 fs = require 'fs'
 _ = require 'lodash'
 
+config.load()
+
 module.exports = class Mailr
   constructor: ->
-    passwordStore = new MacPasswordStore()
-    @config = new Config(passwordStore: passwordStore)
-    @config.load()
     @parser = new MessageParser()
 
   send: (options = {}, callback)->
     message = @parser.parse(options.filename)
     if options.account?
-      accountName = options.account
+      account = config.accounts[options.account]
     else
-      accountName = @config.findAccountByEmail(message.fromAddress)
-    smtpClient = new SmtpClient(@config)
-    smtpClient.connect accountName, (err) ->
+      account = config.findAccountByEmail(message.fromAddress)
+    smtpClient = new SmtpClient()
+    smtpClient.connect(account).then =>
       smtpClient.send message, (err, response) ->
         smtpClient.close()
         callback?(err, response)
 
   getContacts: (accountName, callback) ->
-    @config.getPassword accountName, 'smtp', (err, password) =>
+    account = config.accounts[accountName]
+    account.getPassword('smtp').then (password) =>
       auth =
-        email: @config.accounts[accountName].attribs.username
+        email: account.getUsername()
         password: password
       GoogleContacts = require 'gcontacts'
       gcontacts = new GoogleContacts(auth)

@@ -1,5 +1,10 @@
 require '../spec_helper'
-Account = require '../../lib/config/account'
+passwordStore =
+  get: ->
+Account = sandbox.require '../../lib/config/account',
+  requires:
+    './password_store': passwordStore
+
 
 test = (methodName, attributes, output) ->
   describe "when #{JSON.stringify(attributes)}", ->
@@ -32,10 +37,6 @@ describe "Account", ->
     testWithArgs 'getUsername', ['smtp'], { username: 'bob' }, 'bob'
     testWithArgs 'getUsername', ['smtp'], { smtp: { username: 'bob' } }, 'bob'
 
-  describe "#getPasswordKeySuffix(protocol)", ->
-    testWithArgs 'getPasswordKeySuffix', ['smtp'], { username: 'bob' }, ''
-    testWithArgs 'getPasswordKeySuffix', ['smtp'], { smtp: { username: 'bob' } }, ':smtp'
-
   describe "#getService", ->
     test 'getService', { service: '123' }, '123'
 
@@ -45,3 +46,21 @@ describe "Account", ->
     testWithArgs 'getServer', ['imap'], { service: 'Gmail' },
       { host: 'imap.gmail.com', port: 993 }
 
+  describe "#getPasswordKey(protocol)", ->
+    testWithArgs 'getPasswordKey', ['smtp'], { name: 'myAccount', username: 'bob' },
+      'myAccount'
+    testWithArgs 'getPasswordKey', ['smtp'], { name: 'myAccount', smtp: { username: 'bob' } },
+      'myAccount:smtp'
+
+  describe "#getPassword(protocol)", ->
+    beforeEach ->
+      @account = new Account()
+      @stub(@account, 'getPasswordKey').withArgs('smtp').returns('bob:smtp')
+      @stub(passwordStore, 'get')
+
+    it "gets the password from the password store", ->
+      @account.getPassword('smtp')
+      passwordStore.get.should.have.been.calledWith('bob:smtp')
+
+    it "returns a promise", ->
+      @account.getPassword('smtp').then.should.be.a.function
