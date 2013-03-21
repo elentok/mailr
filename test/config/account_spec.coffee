@@ -83,3 +83,18 @@ describe "Account", ->
           user: 'me@gmail.com'
           pass: 'the-password'
       ).and.notify(done)
+
+  describe "#getContactsSettings", ->
+    beforeEach ->
+      @account = new Account(
+        service: 'Gmail',
+        username: 'me@gmail.com')
+      @stub(@account, 'getPassword') \
+        .withArgs('contacts').returns(Q.when('the-password'))
+    it "returns a promise", ->
+      @account.getContactsSettings().then.should.be.a.function
+    it "resolves with contacts settings", (done) ->
+      @account.getContactsSettings().should.become(
+        email: 'me@gmail.com'
+        password: 'the-password'
+      ).and.notify(done)

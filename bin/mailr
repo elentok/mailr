@@ -3,9 +3,8 @@
 config = require '../lib/config/config'
 config.load()
 
-createMailr = ->
-  Mailr = require '../lib/mailr'
-  new Mailr()
+showError = (err) ->
+  console.log "ERROR: #{err}"
 
 nomnom = require 'nomnom'
 nomnom.script('mailr')
@@ -34,6 +33,7 @@ nomnom.command('contacts')
     account:
       abbr: 'a'
       metavar: 'ACCOUNT'
+      required: true
       help: 'the account from which to send'
     update:
       abbr: 'u'
@@ -41,14 +41,19 @@ nomnom.command('contacts')
       help: 'updates the local contacts file'
   .help("gets the contacts")
   .callback (opts) ->
-    mailr = createMailr()
+    contacts = require '../lib/contacts'
+    promise = null
+    console.log opts.account
     if opts.update
-      mailr.updateContacts opts.account, (err, contacts) ->
-        if err?
-          console.log "ERROR: #{err}"
-        else
-          for contact in contacts
-            console.log contact
+      promise = contacts.updateContacts(opts.account)
+    else
+      promise = contacts.getContacts(opts.account)
+
+    showContacts = (contacts) ->
+      for contact in contacts
+        console.log contact
+
+    promise.then(showContacts, showError)
 
 nomnom.command('addresses')
   .help("shows the available from addresses")
