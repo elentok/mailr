@@ -1,5 +1,8 @@
 #!/usr/bin/env coffee
 
+config = require '../lib/config/config'
+config.load()
+
 createMailr = ->
   Mailr = require '../lib/mailr'
   new Mailr()
@@ -18,9 +21,9 @@ nomnom.command('send')
       required: true
   .help("send an email")
   .callback (opts) ->
-    mailr = createMailr()
+    sender = require '../lib/sender'
     console.log "Sending..."
-    mailr.send(filename: opts.emailFile, account: opts.account) \
+    sender.send(filename: opts.emailFile, account: opts.account) \
       .then (response) ->
         console.log response
       .fail (err) ->
@@ -50,8 +53,6 @@ nomnom.command('contacts')
 nomnom.command('addresses')
   .help("shows the available from addresses")
   .callback ->
-    config = require '../lib/config/config'
-    config.load()
     for address in config.getFromAddresses()
       console.log address
 

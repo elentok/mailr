@@ -5,10 +5,6 @@ config =
   accounts:
     myAccount:
       getSmtpSettings: -> Q.when('smtp-settings')
-    #myAccount:
-      #getService: -> 'Gmail'
-      #getUsername: -> 'bob'
-      #getPassword: -> Q.when('1234')
   load: ->
 
 
@@ -17,13 +13,12 @@ class SmtpClient
   close: ->
   send: ->
 
-Mailr = sandbox.require '../lib/mailr',
+sender = sandbox.require '../lib/sender',
   requires:
     './config/config': config
     './clients/smtp_client': SmtpClient
 
-
-describe "Mailr", ->
+describe "lib/sender", ->
   beforeEach ->
     @connect = SmtpClient.prototype.connect = @stub()
     @send = SmtpClient.prototype.send = @stub().returns(Q.when('123'))
@@ -33,12 +28,10 @@ describe "Mailr", ->
 
   describe "#send", ->
     it "returns a promise", ->
-      mailr = new Mailr()
-      mailr.send(@options).then.should.be.a.function
+      sender.send(@options).then.should.be.a.function
 
     it "sends an email", (done) ->
-      mailr = new Mailr()
-      mailr.send(@options).then =>
+      sender.send(@options).then =>
         expect(@connect).to.have.been.calledWith('smtp-settings')
         expect(@send).to.have.been.called
         from = @send.getCall(0).args[0].from

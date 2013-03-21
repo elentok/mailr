@@ -8,25 +8,6 @@ _ = require 'lodash'
 config.load()
 
 module.exports = class Mailr
-  constructor: ->
-    @parser = new MessageParser()
-
-  send: (options = {})->
-    message = @parser.parse(options.filename)
-    account = @_findAccount(options.account, message.fromAddress)
-    account.getSmtpSettings().then (settings) ->
-      smtpClient = new SmtpClient()
-      smtpClient.connect(settings)
-      smtpClient.send(message).finally =>
-        smtpClient.close()
-
-
-  _findAccount: (accountName, fromAddress) ->
-    if accountName?
-      config.accounts[accountName]
-    else if fromAddress?
-      config.findAccountByEmail(fromAddress)
-
   getContacts: (accountName, callback) ->
     account = config.accounts[accountName]
     account.getPassword('smtp').then (password) =>
