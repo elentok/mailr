@@ -11,17 +11,21 @@ module.exports = class Mailr
   constructor: ->
     @parser = new MessageParser()
 
-  send: (options = {}, callback)->
+  send: (options = {})->
     message = @parser.parse(options.filename)
-    if options.account?
-      account = config.accounts[options.account]
-    else
-      account = config.findAccountByEmail(message.fromAddress)
-    smtpClient = new SmtpClient()
-    smtpClient.connect(account).then =>
-      smtpClient.send message, (err, response) ->
+    account = @_findAccount(options.account, message.fromAddress)
+    account.getSmtpSettings().then (settings) ->
+      smtpClient = new SmtpClient()
+      smtpClient.connect(settings)
+      smtpClient.send(message).finally =>
         smtpClient.close()
-        callback?(err, response)
+
+
+  _findAccount: (accountName, fromAddress) ->
+    if accountName?
+      config.accounts[accountName]
+    else if fromAddress?
+      config.findAccountByEmail(fromAddress)
 
   getContacts: (accountName, callback) ->
     account = config.accounts[accountName]

@@ -11,38 +11,14 @@ describe 'SmtpClient', ->
     @transport = {}
     nodemailer.createTransport = @stub().returns(@transport)
 
-  describe "#getConnectArgs(account)", ->
-    beforeEach ->
-      @client = new SmtpClient()
-      @account =
-        getService: -> 'Gmail'
-        getUsername: -> 'me@gmail.com'
-        getPassword: -> Q.when('the-password')
-
-    it "returns a promise", ->
-      @client.getConnectArgs(@account).then.should.be.a.function
-
-    it "resolves the callback with nodemailer-oriented settings", (done) ->
-      @client.getConnectArgs(@account).should.become(
-        service: 'Gmail'
-        auth:
-          user: 'me@gmail.com'
-          pass: 'the-password'
-      ).and.notify(done)
-
-  describe "#connect(account)", ->
+  describe "#connect(settings)", ->
     beforeEach ->
       @args = 'the-connect-args'
       @client = new SmtpClient()
-      @stub(@client, 'getConnectArgs').returns(Q.when(@args))
 
-    it "returns a promise", ->
-      @client.connect('the-account').then.should.be.a.function
-
-    it "connects to the account's smtp server", (done) ->
-      @client.connect('the-account').then =>
-        expect(nodemailer.createTransport).to.have.been.calledWith('SMTP', @args)
-        done()
+    it "connects to the account's smtp server", ->
+      @client.connect(@args)
+      expect(nodemailer.createTransport).to.have.been.calledWith('SMTP', @args)
 
   describe "#send", ->
     beforeEach ->
@@ -52,15 +28,16 @@ describe 'SmtpClient', ->
         subject: 'hi'
         text: 'yo!'
       @transport.sendMail = @stub()
+      @client = new SmtpClient()
+      @client.transport = @transport
 
-    it "sends an email message", ->
-      client = new SmtpClient()
-      client.transport = @transport
-      client.send(@message, null)
-      expect(@transport.sendMail).to.have.been.calledOnce
-      options = @transport.sendMail.getCall(0).args[0]
-      expect(options).to.eql
-        from: 'me'
-        to: 'you'
-        subject: 'hi'
-        text: 'yo!'
+    it "returns a promise", ->
+      @client.send(@message).then.should.be.a.function
+
+    it "sends an email message", (done) ->
+      @transport.sendMail.callsArgWith(1, null, 'bla')
+      @client.send(@message).then =>
+        expect(@transport.sendMail).to.have.been.calledOnce
+        options = @transport.sendMail.getCall(0).args[0]
+        expect(options).to.eql @message
+        done()

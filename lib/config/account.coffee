@@ -43,6 +43,22 @@ module.exports = class Account
       if service?[protocolName]?
         return service[protocolName]
 
+  getSmtpSettings: ->
+    deferred = Q.defer()
+    @getPassword('smtp') \
+      .then (password) =>
+        deferred.resolve @_buildSmtpSettings(password)
+      .fail (err) ->
+        deferred.reject(err)
+    deferred.promise
+
+  _buildSmtpSettings: (password) ->
+    {
+      service: @getService()
+      auth:
+        user: @getUsername()
+        pass: password
+    }
 
 Account.knownServices =
   Gmail:

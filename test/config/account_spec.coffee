@@ -64,3 +64,22 @@ describe "Account", ->
 
     it "returns a promise", ->
       @account.getPassword('smtp').then.should.be.a.function
+
+  describe "#getSmtpSettings", ->
+    beforeEach ->
+      @account = new Account(
+        service: 'Gmail',
+        username: 'me@gmail.com')
+      @stub(@account, 'getPassword') \
+        .withArgs('smtp').returns(Q.when('the-password'))
+
+    it "returns a promise", ->
+      @account.getSmtpSettings().then.should.be.a.function
+
+    it "resolves with node-mailer settings", (done) ->
+      @account.getSmtpSettings().should.become(
+        service: 'Gmail'
+        auth:
+          user: 'me@gmail.com'
+          pass: 'the-password'
+      ).and.notify(done)

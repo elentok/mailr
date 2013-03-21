@@ -20,12 +20,11 @@ nomnom.command('send')
   .callback (opts) ->
     mailr = createMailr()
     console.log "Sending..."
-    mailr.send {filename: opts.emailFile, account: opts.account},
-      (err, response) ->
-        if err?
-          console.log "ERROR: #{err}"
-        else
-          console.log response
+    mailr.send(filename: opts.emailFile, account: opts.account) \
+      .then (response) ->
+        console.log response
+      .fail (err) ->
+        console.log "ERROR: #{err}"
 
 nomnom.command('contacts')
   .options
