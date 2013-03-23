@@ -30,15 +30,14 @@ describe "lib/contacts", ->
       @stub(config.accounts.myAccount, 'getContactsSettings').returns(Q.when(123))
       contacts.getContacts('myAccount')
       expect(config.accounts.myAccount.getContactsSettings).to.have.been.called
-    it "calls GoogleContacts::connect", (done) ->
+    it "calls GoogleContacts::connect", ->
       @stub(GoogleContacts.prototype, 'connect').returns(Q.when(123))
       contacts.getContacts('myAccount').then ->
         expect(GoogleContacts::connect).to.have.been.calledWith('the-settings')
-        done()
-    it "calls GoogleContacts::getContacts", (done) ->
+    it "calls GoogleContacts::getContacts", ->
       page = { contacts: 'the-contacts' }
       @stub(GoogleContacts.prototype, 'getContacts').returns(Q.when(page))
-      contacts.getContacts('myAccount').should.become('the-contacts').and.notify(done)
+      contacts.getContacts('myAccount').should.become('the-contacts')
 
   describe "#getContactsFile(accountName)", ->
     beforeEach ->
@@ -61,15 +60,14 @@ describe "lib/contacts", ->
       contacts.updateContacts('bla')
       expect(contacts.getContacts).to.have.been.calledWith('bla')
 
-    it "formats each contact using 'formatContact'", (done) ->
+    it "formats each contact using 'formatContact'", ->
       @stub(contacts, 'formatContact')
       contact = {email: 'bob@gmail.com'}
       contacts.getContacts.returns(Q.when([contact]))
       contacts.updateContacts('bla').then ->
         contacts.formatContact.should.have.been.calledWith(contact)
-        done()
 
-    it "writes the contacts to file", (done) ->
+    it "writes the contacts to file", ->
       theContacts = [ { email: 'bob@gmail.com' }, { email: 'joe@gmail.com' } ]
       @stub(fs, 'writeFileSync')
       @stub(contacts, 'getContactsFile').withArgs('bla').returns('the-path')
@@ -77,12 +75,10 @@ describe "lib/contacts", ->
       contacts.updateContacts('bla').then ->
         fs.writeFileSync.should.have.been.calledWith('the-path',
           'bob@gmail.com\njoe@gmail.com')
-        done()
 
-    it "resolves the promise when successful", (done) ->
+    it "resolves the promise when successful", ->
       contacts.getContacts.returns(Q.when([]))
-      contacts.updateContacts('bla').then ->
-        done()
+      contacts.updateContacts('bla').should.be.fulfilled
 
   describe "#formatContact", ->
     test_formatContact = (contact, output) ->

@@ -30,13 +30,12 @@ describe "lib/sender", ->
     it "returns a promise", ->
       sender.send(@options).then.should.be.a.function
 
-    it "sends an email", (done) ->
+    it "sends an email", ->
       sender.send(@options).then =>
         expect(@connect).to.have.been.calledWith('smtp-settings')
         expect(@send).to.have.been.called
         from = @send.getCall(0).args[0].from
         expect(from).to.equal 'Me <me@me.com>'
-        done()
 
 
 

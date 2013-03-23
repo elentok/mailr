@@ -34,10 +34,9 @@ describe 'SmtpClient', ->
     it "returns a promise", ->
       @client.send(@message).then.should.be.a.function
 
-    it "sends an email message", (done) ->
+    it "sends an email message", ->
       @transport.sendMail.callsArgWith(1, null, 'bla')
       @client.send(@message).then =>
         expect(@transport.sendMail).to.have.been.calledOnce
         options = @transport.sendMail.getCall(0).args[0]
         expect(options).to.eql @message
-        done()

@@ -76,13 +76,13 @@ describe "Account", ->
     it "returns a promise", ->
       @account.getSmtpSettings().then.should.be.a.function
 
-    it "resolves with node-mailer settings", (done) ->
+    it "resolves with node-mailer settings", ->
       @account.getSmtpSettings().should.become(
         service: 'Gmail'
         auth:
           user: 'me@gmail.com'
           pass: 'the-password'
-      ).and.notify(done)
+      )
 
   describe "#getContactsSettings", ->
     beforeEach ->
@@ -93,11 +93,11 @@ describe "Account", ->
         .withArgs('contacts').returns(Q.when('the-password'))
     it "returns a promise", ->
       @account.getContactsSettings().then.should.be.a.function
-    it "resolves with contacts settings", (done) ->
+    it "resolves with contacts settings", ->
       @account.getContactsSettings().should.become(
         email: 'me@gmail.com'
         password: 'the-password'
-      ).and.notify(done)
+      )
 
   describe "#getImapSettings", ->
     beforeEach ->
@@ -108,7 +108,7 @@ describe "Account", ->
         .withArgs('imap').returns(Q.when('the-password'))
     it "returns a promise", ->
       @account.getImapSettings().then.should.be.a.function
-    it "resolves with imap settings", (done) ->
+    it "resolves with imap settings", ->
       @account.getImapSettings().then (settings) ->
         expect(settings[0]).to.equal 993
         expect(settings[1]).to.equal 'imap.gmail.com'
@@ -118,4 +118,3 @@ describe "Account", ->
             user: 'me@gmail.com'
             pass: 'the-password'
         }
-        done()

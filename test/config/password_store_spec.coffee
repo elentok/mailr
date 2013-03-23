@@ -23,9 +23,9 @@ describe "config/password_store", ->
       keychain.get.should.have.been.calledWith 'mailr', 'the-key'
 
     describe "when the password is in the keychain", ->
-      it "resolves with the password", (done) ->
+      it "resolves with the password", ->
         @stub(keychain, 'get').withArgs('mailr', 'the-key').returns('the-password')
-        store.get('the-key').should.become('the-password').and.notify(done)
+        store.get('the-key').should.become('the-password')
 
     describe "else", ->
       beforeEach ->
@@ -49,12 +49,12 @@ describe "config/password_store", ->
           store.get('the-key').should.become('a-password')
 
       describe "when the user enters an empty password", ->
-        it "fails with 'user-abort'", (done) ->
+        it "fails with 'user-abort'", ->
           commander.password.callsArgWith(1, '')
-          store.get('the-key').should.be.rejected.with(Error, 'user-abort').and.notify(done)
+          store.get('the-key').should.be.rejected.with(Error, 'user-abort')
 
       describe "when the user aborts", ->
-        it "fails with 'user-abort'", (done) ->
+        it "fails with 'user-abort'", ->
           commander.password.callsArgWith(1, null)
-          store.get('the-key').should.be.rejected.with(Error, 'user-abort').and.notify(done)
+          store.get('the-key').should.be.rejected.with(Error, 'user-abort')
 
