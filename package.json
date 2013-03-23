@@ -45,6 +45,7 @@
   "devDependencies": {
     "coffee-script": "1.4.x",
     "mocha": "1.8.x",
+    "mocha-as-promised": "*",
     "chai": "1.5.x",
     "sinon": "1.5.x",
     "sinon-chai": "2.3.x",

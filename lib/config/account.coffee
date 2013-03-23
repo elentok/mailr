@@ -61,6 +61,20 @@ module.exports = class Account
           password: password
         }
 
+  getImapSettings: ->
+    @getPassword('imap').then (password) =>
+      server = @getServer('imap')
+      return [
+        server.port,
+        server.host,
+        {
+          secureConnection: true
+          auth:
+            user: @getUsername()
+            pass: password
+        }
+      ]
+
 Account.knownServices =
   Gmail:
     imap:

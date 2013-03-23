@@ -61,5 +61,20 @@ nomnom.command('addresses')
     for address in config.getFromAddresses()
       console.log address
 
+nomnom.command('mailboxes')
+  .help("shows the mailboxes")
+  .options
+    account:
+      abbr: 'a'
+      metavar: 'ACCOUNT'
+      required: true
+      help: 'the account from which to send'
+  .callback (opts) ->
+    ImapClient = require '../lib/clients/imap_client'
+    config.accounts[opts.account].getImapSettings().then (settings) ->
+      client = new ImapClient()
+      client.connect(settings).then ->
+        client.getMailboxes().then (mailboxes) ->
+          console.log mailboxes
 
 nomnom.parse()

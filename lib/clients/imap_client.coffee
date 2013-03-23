@@ -1,56 +1,21 @@
+Q = require 'q'
 inbox = require 'inbox'
 
-#Config = require './config/config'
-
 module.exports = class ImapClient
-  constructor: (options) ->
-    @client = inbox.createConnection false, options.server,
-      secureConnection: true,
-      auth:
-        user: options.username,
-        pass: options.password
-    @client.on 'connect', => @onConnect()
+  connect: (options) ->
+    defer = Q.defer()
+    @connection = inbox.createConnection.apply(inbox, options)
+    @connection.on 'connect', -> defer.resolve()
+    @connection.on 'error', (err) -> defer.reject(err)
+    @connection.connect()
+    defer.promise
 
-  connect: (callback) ->
-    console.log "Connecting..."
-    @client.on 'connect', ->
-      callback(null)
-    @client.on 'error', (err) ->
-      callback(err)
-    @client.connect()
+  getMailboxes: ->
+    defer = Q.defer()
+    @connection.listMailboxes (err, mailboxes) ->
+      if err?
+        defer.reject(err)
+      else
+        defer.resolve(mailboxes)
+    defer.promise
 
-  onConnect: ->
-    console.log "Connected!"
-    @client.listMailboxes (err, mailboxes) ->
-      console.log err
-      console.log mailboxes
-
-  getMailboxes: (callback) ->
-
-ImapClient.getSettings = (config, accountName, callback) ->
-  account = config.accounts[accountName]
-  options = account.getServer('imap') or {}
-  options.username = account.getUsername('imap')
-  config.getPassword accountName, 'imap', (err, password) ->
-    if err?
-      callback(err)
-    else
-      options.password = password
-      callback(null, options)
-
-
-
-
-
-#passwordStore = new (require './config/mac_password_store')()
-#config = new Config(passwordStore: passwordStore)
-#config.load()
-
-#config.getPassword 'gmail', 'imap', (err, password) ->
-  #opts =
-    #server: 'imap.gmail.com'
-    #port: 993
-    #username: config.accounts.gmail.getUsername()
-    #password: password
-  #mailbox = new Mailbox(opts)
-  #mailbox.connect()

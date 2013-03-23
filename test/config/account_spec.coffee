@@ -98,3 +98,24 @@ describe "Account", ->
         email: 'me@gmail.com'
         password: 'the-password'
       ).and.notify(done)
+
+  describe "#getImapSettings", ->
+    beforeEach ->
+      @account = new Account(
+        service: 'Gmail',
+        username: 'me@gmail.com')
+      @stub(@account, 'getPassword') \
+        .withArgs('imap').returns(Q.when('the-password'))
+    it "returns a promise", ->
+      @account.getImapSettings().then.should.be.a.function
+    it "resolves with imap settings", (done) ->
+      @account.getImapSettings().then (settings) ->
+        expect(settings[0]).to.equal 993
+        expect(settings[1]).to.equal 'imap.gmail.com'
+        expect(settings[2]).to.eql {
+          secureConnection: true
+          auth:
+            user: 'me@gmail.com'
+            pass: 'the-password'
+        }
+        done()

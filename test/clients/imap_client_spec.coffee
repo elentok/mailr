@@ -1,57 +1,77 @@
 require '../spec_helper'
 
-inbox = {}
+connection =
+  connect: ->
+  on: ->
+  listMailboxes: ->
 
-ImapClient = require '../../lib/clients/imap_client',
+inbox =
+  createConnection: -> connection
+
+ImapClient = sandbox.require '../../lib/clients/imap_client',
   requires:
     inbox: inbox
 
-xdescribe "ImapClient", ->
-  describe ".getSettings", ->
-    it "gets the correct settings from Config", (done) ->
-      config =
-        accounts:
-          myAccount:
-            getServer: (protocol) ->
-              expect(protocol).to.equal 'imap'
-              { host: 'imap.gmail.com', port: 123 }
-            getUsername: (protocol) ->
-              expect(protocol).to.equal 'imap'
-              'my-user'
-        getPassword: (accountName, protocol, callback) ->
-          expect(accountName).to.equal 'myAccount'
-          expect(protocol).to.equal 'imap'
-          callback(null, 'my-password')
+describe "ImapClient", ->
+  beforeEach ->
+    @settings = ['the-port', 'imap.gmail.com', {
+      secureConnection: true,
+      auth:
+        user: 'my-user'
+        pass: 'my-password'
+    }]
+    @client = new ImapClient()
 
-      ImapClient.getSettings config, 'myAccount', (err, settings) ->
-        expect(settings).to.eql {
-          host: 'imap.gmail.com'
-          port: 123
-          username: 'my-user'
-          password: 'my-password'
-        }
-        done()
+  describe "#connect(settings)", ->
+    it "returns a promise", ->
+      @client.connect(@settings).then.should.be.a.function
 
-  describe "#connect", ->
-    beforeEach ->
-      @settings =
-        host: 'imap.gmail.com'
-        port: 123
-        username: 'my-user'
-        password: 'my-password'
-      @client = new ImapClient(@settings)
+    it "creates a new inbox connection", ->
+      @spy(inbox, 'createConnection')
+      @client.connect(@settings)
+      inbox.createConnection.should.have.been.calledOnce
+      inbox.createConnection.lastCall.args.should.eql @settings
 
-    it "creates a connection", ->
-
-
-    it "calls inbox.connect", ->
-      client = new ImapClient(settings)
-      client.connect()
-
+    it "calls connection.connect", ->
+      @stub(connection, 'connect')
+      @client.connect(@settings)
+      connection.connect.should.have.been.calledOnce
 
     describe "when successful", ->
-      it "calls the callback with null", ->
+      it "resolves the promise", ->
+        @stub(connection, 'on').withArgs('connect').callsArgWith(1, null)
+        @client.connect(@settings).should.be.fulfilled
+
+    describe "when error", ->
+      it "rejects the promise", ->
+        @stub(connection, 'on').withArgs('error').callsArgWith(1, 'the-error')
+        @client.connect(@settings).fail (err) ->
+          expect(err).to.equal 'the-error'
+
+  describe "#getMailboxes", ->
+    it "returns a promise", ->
+      @client.connect(@settings)
+      @client.getMailboxes().then.should.be.a.function
+
+    it "calls connection.listMailboxes", ->
+      @stub(connection, 'listMailboxes')
+      @client.connect(@settings)
+      @client.getMailboxes()
+      connection.listMailboxes.should.have.been.calledOnce
+
+    describe "when successful", ->
+      it "resolves the promise with the mailboxes", ->
+        @stub(connection, 'listMailboxes') \
+          .callsArgWith(0, null, 'the-mailboxes')
+        @client.connect(@settings)
+        @client.getMailboxes().should.become('the-mailboxes')
+
     describe "when fails", ->
-      it "calls the callback with the error", ->
+      it "rejects the promise with the error", ->
+        @stub(connection, 'listMailboxes') \
+          .callsArgWith(0, 'the-error', null)
+        @client.connect(@settings)
+        @client.getMailboxes().fail (err) ->
+          err.should.equal 'the-error'
 
 
