@@ -9,7 +9,9 @@ module.exports = class Account
     @attribs = attribs
 
   getDataPath: ->
-    dataPath = path.join(config.currentPath, 'accounts', @attribs.name)
+    dataPath = path.join(config.currentPath, 'accounts')
+    fs.mkdirSync(dataPath) unless fs.existsSync(dataPath)
+    dataPath = path.join(dataPath, @attribs.name)
     fs.mkdirSync(dataPath) unless fs.existsSync(dataPath)
     dataPath
 

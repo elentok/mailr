@@ -131,10 +131,21 @@ describe "Account", ->
     beforeEach ->
       config.currentPath = 'the-path'
       @account = new Account(name: 'myAccount')
-    it "creates the path if it doesn't exist", ->
+    it "creates the /accounts if it doesn't exist", ->
       @stub(fs, 'mkdirSync')
-      @stub(fs, 'existsSync').withArgs('the-path/accounts/myAccount').returns(false)
+      @stub(fs, 'existsSync') \
+        .withArgs('the-path/accounts').returns(false) \
+        .withArgs('the-path/accounts/myAccount').returns(false)
       @account.getDataPath()
+      fs.mkdirSync.should.have.been.calledWith('the-path/accounts')
+      fs.mkdirSync.should.have.been.calledWith('the-path/accounts/myAccount')
+    it "creates the /accounts/{myAccount} path if it doesn't exist", ->
+      @stub(fs, 'mkdirSync')
+      @stub(fs, 'existsSync') \
+        .withArgs('the-path/accounts').returns(true) \
+        .withArgs('the-path/accounts/myAccount').returns(false)
+      @account.getDataPath()
+      fs.mkdirSync.should.not.have.been.calledWith('the-path/accounts')
       fs.mkdirSync.should.have.been.calledWith('the-path/accounts/myAccount')
     it "returns {config.currentPath}/accounts/{accountName}", ->
       @account.getDataPath().should.equal 'the-path/accounts/myAccount'
