@@ -1,9 +1,17 @@
 passwordStore = require './password_store'
 Q = require 'q'
+config = require './config'
+path = require 'path'
+fs = require 'fs'
 
 module.exports = class Account
   constructor: (attribs = {}) ->
     @attribs = attribs
+
+  getDataPath: ->
+    dataPath = path.join(config.currentPath, 'accounts', @attribs.name)
+    fs.mkdirSync(dataPath) unless fs.existsSync(dataPath)
+    dataPath
 
   getFromAddress: ->
     if @attribs.fullname?

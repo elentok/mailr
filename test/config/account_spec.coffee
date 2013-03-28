@@ -1,9 +1,17 @@
 require '../spec_helper'
+
+fs =
+  mkdirSync: ->
+  existsSync: -> true
+  writeFileSync: ->
 passwordStore =
   get: ->
+config = {}
 Account = sandbox.require '../../lib/config/account',
   requires:
+    './config': config
     './password_store': passwordStore
+    fs: fs
 
 
 test = (methodName, attributes, output) ->
@@ -118,3 +126,18 @@ describe "Account", ->
             user: 'me@gmail.com'
             pass: 'the-password'
         }
+
+  describe "#getDataPath", ->
+    beforeEach ->
+      config.currentPath = 'the-path'
+      @account = new Account(name: 'myAccount')
+    it "creates the path if it doesn't exist", ->
+      @stub(fs, 'mkdirSync')
+      @stub(fs, 'existsSync').withArgs('the-path/accounts/myAccount').returns(false)
+      @account.getDataPath()
+      fs.mkdirSync.should.have.been.calledWith('the-path/accounts/myAccount')
+    it "returns {config.currentPath}/accounts/{accountName}", ->
+      @account.getDataPath().should.equal 'the-path/accounts/myAccount'
+
+
+
