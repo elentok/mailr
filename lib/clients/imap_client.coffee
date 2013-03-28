@@ -1,5 +1,6 @@
 Q = require 'q'
 inbox = require 'inbox'
+_ = require 'lodash'
 
 module.exports = class ImapClient
   connect: (options) ->
@@ -19,3 +20,24 @@ module.exports = class ImapClient
         defer.resolve(mailboxes)
     defer.promise
 
+  getMailboxChildren: (mailbox) ->
+    defer = Q.defer()
+    mailbox.listChildren (err, children) ->
+      if err?
+        defer.reject(err)
+      else
+        defer.resolve(children)
+    defer.promise
+
+  loadMailboxesChildren: (mailboxes) ->
+    promises = _.map mailboxes, (mailbox) =>
+      @getMailboxChildren(mailbox).then (children) ->
+        mailbox.children = children
+        mailbox
+    Q.all(promises)
+
+  getMailboxesRecursive: ->
+    @getMailboxes().then (mailboxes) => @loadMailboxesChildren(mailboxes)
+
+  close: ->
+    @connection.close()

@@ -4,6 +4,7 @@ connection =
   connect: ->
   on: ->
   listMailboxes: ->
+  close: ->
 
 inbox =
   createConnection: -> connection
@@ -73,5 +74,59 @@ describe "ImapClient", ->
         @client.connect(@settings)
         @client.getMailboxes().fail (err) ->
           err.should.equal 'the-error'
+
+  describe "#getMailboxChildren", ->
+    beforeEach ->
+      @mailbox =
+        listChildren: @stub()
+    it "returns a promise", ->
+      @client.getMailboxChildren(@mailbox).then.should.be.a.function
+
+    it "calls mailbox.listChildren", ->
+      @mailbox.listChildren.callsArgWith(0, null, [])
+      @client.getMailboxChildren(@mailbox).then =>
+        @mailbox.listChildren.should.have.been.calledOnce
+
+    describe "when successful", ->
+      it "resolves with the children", ->
+        children = ['a', 'b']
+        @mailbox.listChildren.callsArgWith(0, null, children)
+        @client.getMailboxChildren(@mailbox).should.become(children)
+
+    describe "when error", ->
+      it "rejects with the error", ->
+        @mailbox.listChildren.callsArgWith(0, 'the-err', null)
+        @client.getMailboxChildren(@mailbox).fail (err) ->
+          expect(err).to.equal 'the-err'
+
+  describe "#close", ->
+    it "closes the connection", ->
+      @client.connection =
+        close: @stub()
+      @client.close()
+      @client.connection.close.should.have.been.calledOnce
+
+  describe "#getMailboxesRecursive", ->
+    it "resolves the promise when all mailboxes are loaded", ->
+      mailbox1 =
+        path: 'one'
+      mailbox1children = [ 'a', 'b' ]
+      mailbox2 =
+        path: 'two'
+      mailbox2children = [ 'c', 'd' ]
+
+      @stub(@client, 'getMailboxes').returns Q.when([mailbox1, mailbox2])
+      @stub(@client, 'getMailboxChildren') \
+        .withArgs(mailbox1).returns(Q.when(mailbox1children)) \
+        .withArgs(mailbox2).returns(Q.when(mailbox2children))
+
+      @client.getMailboxesRecursive().then (mailboxes) ->
+        expect(mailboxes).to.eql [{
+          path: 'one', children: [ 'a', 'b' ],
+        }, {
+          path: 'two', children: [ 'c', 'd' ],
+        }]
+
+
 
 
