@@ -28,6 +28,22 @@ nomnom.command('send')
       .fail (err) ->
         console.log "ERROR: #{err}"
 
+nomnom.command('preview')
+  .options
+    emailFile:
+      position: 1
+      help: 'name of email file to send'
+      required: true
+  .help("previews the generated html")
+  .callback (opts) ->
+    Parser = require '../lib/message_parser'
+    parser = new Parser()
+    message = parser.parse(opts.emailFile)
+
+    fs = require 'fs'
+    fs.writeFileSync('/tmp/mail-preview.html', message.html)
+
+
 nomnom.command('contacts')
   .options
     account:
