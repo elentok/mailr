@@ -40,7 +40,8 @@
     "nodemailer": "0.3.x",
     "gcontacts": "*",
     "inbox": "*",
-    "q": "*"
+    "q": "*",
+    "marked": "*"
   },
   "devDependencies": {
     "coffee-script": "1.4.x",

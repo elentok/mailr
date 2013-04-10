@@ -1,5 +1,6 @@
 fs = require 'fs'
 _ = require 'lodash'
+marked = require 'marked'
 
 module.exports = class MessageParser
   parse: (filePath) ->
@@ -10,6 +11,7 @@ module.exports = class MessageParser
     for line in email.split("\n")
       @_parseLine(line)
     @message.text = @bodyLines.join("\n").trim()
+    @message.html = marked(@message.text)
     @message
 
   _parseLine: (line) ->
